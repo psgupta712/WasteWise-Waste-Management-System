@@ -294,28 +294,28 @@ const RewardsSystem = () => {
       {/* Tab Navigation */}
       <div className="rewards-tabs">
         <button
-          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
         >
           <Target size={18} />
           Overview
         </button>
         <button
-          className={`tab-btn ${activeTab === 'badges' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'badges' ? 'active' : ''}`}
           onClick={() => setActiveTab('badges')}
         >
           <Award size={18} />
           Badges
         </button>
         <button
-          className={`tab-btn ${activeTab === 'leaderboard' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'leaderboard' ? 'active' : ''}`}
           onClick={() => setActiveTab('leaderboard')}
         >
           <Users size={18} />
           Leaderboard
         </button>
         <button
-          className={`tab-btn ${activeTab === 'redeem' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'redeem' ? 'active' : ''}`}
           onClick={() => setActiveTab('redeem')}
         >
           <Gift size={18} />

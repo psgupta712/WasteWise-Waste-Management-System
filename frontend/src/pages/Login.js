@@ -70,12 +70,16 @@ const Login = () => {
         // Redirect based on userType
         if (result.data.userType === 'citizen') {
           navigate('/citizen/dashboard');
+        } else if (result.data.userType === 'pickup_agent') {
+          navigate('/agent/dashboard');
         } else if (result.data.userType === 'industry') {
           navigate('/industry/dashboard');
         } else if (result.data.userType === 'admin') {
           navigate('/admin/dashboard');
         } else {
-          navigate('/dashboard');
+          // Fallback for unknown user types
+          navigate('/login');
+          setError('Unknown user type. Please contact support.');
         }
       } else {
         setError(result.error || 'Login failed. Please check your credentials.');

@@ -262,12 +262,17 @@
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 40px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #F9FAFB;
 }
 
 .user-type-dropdown option {
   padding: 12px;
   font-size: 1rem;
 }
+
+
 
 .form-group input::placeholder {
   color: #9CA3AF;

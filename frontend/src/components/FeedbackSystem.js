@@ -211,21 +211,21 @@ const FeedbackSystem = () => {
       {/* Tabs */}
       <div className="feedback-tabs">
         <button
-          className={`tab-btn ${activeTab === 'submit' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'submit' ? 'active' : ''}`}
           onClick={() => setActiveTab('submit')}
         >
           <Send size={18} />
           Submit Feedback
         </button>
         <button
-          className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
           <FileText size={18} />
           My Feedback
         </button>
         <button
-          className={`tab-btn ${activeTab === 'contact' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'contact' ? 'active' : ''}`}
           onClick={() => setActiveTab('contact')}
         >
           <Phone size={18} />

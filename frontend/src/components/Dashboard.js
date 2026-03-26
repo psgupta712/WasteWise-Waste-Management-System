@@ -223,7 +223,7 @@ const Dashboard = () => {
           {quickActions.map((action) => (
             <button 
               key={action.id} 
-              className="quick-action-card"
+              className="quick-action-card1"
               style={{ '--action-color': action.color }}
             >
               <div className="action-icon">
@@ -360,7 +360,7 @@ const Dashboard = () => {
         <div className="activity-card">
           <div className="activity-header">
             <h3 className="activity-title">Recent Activity</h3>
-            <button className="view-all-btn">View All</button>
+            {/* <button className="view-all-btn">View All</button> */}
           </div>
           <div className="activity-list">
             {recentActivity.length > 0 ? (
@@ -394,7 +394,7 @@ const Dashboard = () => {
         <div className="achievements-card">
           <div className="achievements-header">
             <h3 className="achievements-title">Recent Achievements</h3>
-            <button className="view-all-btn">View All</button>
+            {/* <button className="view-all-btn">View All</button> */}
           </div>
           <div className="achievements-list">
             <div className="achievement-item unlocked">

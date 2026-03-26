@@ -339,17 +339,17 @@ const SchedulePickup = ({ onSuccess }) => {
       {/* Info Cards */}
       <div className="info-cards">
         <div className="info-card">
-          <div className="info-icon">⏰</div>
+          <div className="info-icon1">⏰</div>
           <h4>Quick Response</h4>
           <p>Get confirmation within 30 minutes</p>
         </div>
         <div className="info-card">
-          <div className="info-icon">📍</div>
+          <div className="info-icon1">📍</div>
           <h4>Track in Real-time</h4>
           <p>Know exactly when we'll arrive</p>
         </div>
         <div className="info-card">
-          <div className="info-icon">🎁</div>
+          <div className="info-icon1">🎁</div>
           <h4>Earn Rewards</h4>
           <p>Get points for every pickup</p>
         </div>

@@ -211,21 +211,21 @@ const WasteGuide = () => {
       {/* Tab Navigation */}
       <div className="tab-navigation">
         <button
-          className={`tab-btn ${activeTab === 'camera' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'camera' ? 'active' : ''}`}
           onClick={() => setActiveTab('camera')}
         >
           <Camera size={20} />
           AI Classification
         </button>
         <button
-          className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
           <Search size={20} />
           Search Database
         </button>
         <button
-          className={`tab-btn ${activeTab === 'browse' ? 'active' : ''}`}
+          className={`tab-btn1 ${activeTab === 'browse' ? 'active' : ''}`}
           onClick={() => setActiveTab('browse')}
         >
           <Info size={20} />
@@ -247,14 +247,14 @@ const WasteGuide = () => {
                   
                   <div className="upload-buttons">
                     <button
-                      className="upload-btn camera-btn"
+                      className="upload-btn1 camera-btn"
                       onClick={() => cameraInputRef.current?.click()}
                     >
                       <Camera size={20} />
                       Take Photo
                     </button>
                     <button
-                      className="upload-btn file-btn"
+                      className="upload-btn1 file-btn"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload size={20} />

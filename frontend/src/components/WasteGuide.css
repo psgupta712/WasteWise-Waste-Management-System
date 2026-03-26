@@ -59,7 +59,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-.tab-btn {
+.tab-btn1 {
   flex: 1;
   display: flex;
   align-items: center;
@@ -76,12 +76,12 @@
   transition: all 0.3s ease;
 }
 
-.tab-btn:hover {
+.tab-btn1:hover {
   background: #f8f9fa;
   color: #333;
 }
 
-.tab-btn.active {
+.tab-btn1.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
@@ -148,7 +148,7 @@
   flex-wrap: wrap;
 }
 
-.upload-btn {
+.upload-btn1 {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -857,7 +857,7 @@
     flex-direction: column;
   }
 
-  .upload-btn {
+  .upload-btn1 {
     width: 100%;
   }
 

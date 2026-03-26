@@ -11,6 +11,35 @@ const {
   notifyPickupCancelled 
 } = require('../utils/notificationHelper');
 
+// ✅ NEW: Helper function to assign pickup to an available agent
+const assignToAgent = async () => {
+  try {
+    // Find all pickup agents
+    const agents = await User.find({ 
+      userType: 'pickup_agent',
+      isVerified: true 
+    });
+
+    if (agents.length === 0) {
+      console.log('No pickup agents available');
+      return null;
+    }
+
+    // Simple assignment: Random agent (you can improve this with smart logic)
+    const randomIndex = Math.floor(Math.random() * agents.length);
+    return agents[randomIndex]._id;
+
+    // 🔮 Future Enhancement Ideas:
+    // - Assign based on agent's current workload
+    // - Assign based on proximity to pickup location
+    // - Assign based on agent's availability/status
+    // - Round-robin assignment for fairness
+  } catch (error) {
+    console.error('Error assigning to agent:', error);
+    return null;
+  }
+};
+
 // @desc    Schedule a new pickup
 // @route   POST /api/pickup/schedule
 // @access  Private (Citizen only)
@@ -46,6 +75,9 @@ router.post('/schedule', protect, async (req, res) => {
       });
     }
 
+    // ✅ NEW: Auto-assign to a pickup agent
+    const assignedAgentId = await assignToAgent();
+
     // Create pickup
     const pickup = await Pickup.create({
       user: req.user._id,
@@ -55,7 +87,9 @@ router.post('/schedule', protect, async (req, res) => {
       address,
       estimatedWeight: estimatedWeight || 0,
       contactPhone: contactPhone || req.user.phone,
-      specialInstructions: specialInstructions || ''
+      specialInstructions: specialInstructions || '',
+      assignedCollector: assignedAgentId, // ✅ FIXED: Assign agent here
+      status: assignedAgentId ? 'confirmed' : 'scheduled' // ✅ Status based on assignment
     });
 
     // ✅ Create Notification for scheduling
@@ -75,7 +109,9 @@ router.post('/schedule', protect, async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Pickup scheduled successfully',
+      message: assignedAgentId 
+        ? 'Pickup scheduled and assigned to agent successfully' 
+        : 'Pickup scheduled successfully (pending agent assignment)',
       data: {
         _id: pickup._id,
         wasteType: pickup.wasteType,
@@ -83,6 +119,7 @@ router.post('/schedule', protect, async (req, res) => {
         timeSlot: pickup.timeSlot,
         verificationCode: pickup.verificationCode,
         status: pickup.status,
+        assignedCollector: pickup.assignedCollector,
         pointsAwarded: Math.floor(points / 2)
       }
     });
@@ -99,11 +136,21 @@ router.post('/schedule', protect, async (req, res) => {
 
 // @desc    Get all pickups for current user
 // @route   GET /api/pickup/my-pickups
-// @access  Private (Citizen)
+// @access  Private (Citizen + Agent)
 router.get('/my-pickups', protect, async (req, res) => {
   try {
     const { status, limit = 10, page = 1 } = req.query;
-    const query = { user: req.user._id };
+    
+    // ✅ IMPROVED: Different query based on userType
+    let query;
+    
+    if (req.user.userType === 'pickup_agent') {
+      // For agents: Get pickups assigned to them
+      query = { assignedCollector: req.user._id };
+    } else {
+      // For citizens: Get their own pickups
+      query = { user: req.user._id };
+    }
 
     // Filter by status if provided
     if (status) query.status = status;
@@ -114,7 +161,8 @@ router.get('/my-pickups', protect, async (req, res) => {
       .sort({ pickupDate: -1 })
       .limit(parseInt(limit))
       .skip(skip)
-      .populate('assignedCollector', 'name phone');
+      .populate('assignedCollector', 'name phone')
+      .populate('user', 'name email phone address');
 
     const total = await Pickup.countDocuments(query);
 
@@ -153,8 +201,13 @@ router.get('/:id', protect, async (req, res) => {
       });
     }
 
-    // Authorization
-    if (pickup.user._id.toString() !== req.user._id.toString() && req.user.userType !== 'admin') {
+    // ✅ IMPROVED: Authorization check for both citizen and agent
+    const isOwner = pickup.user._id.toString() === req.user._id.toString();
+    const isAssignedAgent = pickup.assignedCollector && 
+                           pickup.assignedCollector._id.toString() === req.user._id.toString();
+    const isAdmin = req.user.userType === 'admin';
+
+    if (!isOwner && !isAssignedAgent && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to access this pickup'
@@ -305,9 +358,19 @@ router.put('/:id/rate', protect, async (req, res) => {
   }
 });
 
-// ✅ Example: Route for marking pickup completed (if exists)
-router.put('/:id/complete', protect, async (req, res) => {
+// ✅ @desc    Start a pickup (Agent marks as in-progress)
+// ✅ @route   PUT /api/pickup/:id/start
+// ✅ @access  Private (Pickup Agent only)
+router.put('/:id/start', protect, async (req, res) => {
   try {
+    // Check if user is pickup agent
+    if (req.user.userType !== 'pickup_agent') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only pickup agents can start pickups'
+      });
+    }
+
     const pickup = await Pickup.findById(req.params.id);
 
     if (!pickup) {
@@ -317,13 +380,108 @@ router.put('/:id/complete', protect, async (req, res) => {
       });
     }
 
-    // Update status to completed
-    pickup.status = 'completed';
-    pickup.actualPickupTime = new Date();
+    // Check if pickup is assigned to this agent
+    if (!pickup.assignedCollector || pickup.assignedCollector.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'This pickup is not assigned to you'
+      });
+    }
 
-    // Calculate final points
+    // Check if pickup can be started
+    if (pickup.status === 'completed' || pickup.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot start this pickup'
+      });
+    }
+
+    // Update status to in-progress
+    pickup.status = 'in-progress';
+    await pickup.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Pickup started successfully',
+      data: pickup
+    });
+
+  } catch (error) {
+    console.error('Start pickup error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error starting pickup',
+      error: error.message
+    });
+  }
+});
+
+// ✅ @desc    Complete a pickup (Agent marks as completed with photo, weight, verification)
+// ✅ @route   PUT /api/pickup/:id/complete
+// ✅ @access  Private (Pickup Agent only)
+router.put('/:id/complete', protect, async (req, res) => {
+  try {
+    const { verificationCode, actualWeight, completionPhoto, notes } = req.body;
+
+    // Check if user is pickup agent
+    if (req.user.userType !== 'pickup_agent') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only pickup agents can complete pickups'
+      });
+    }
+
+    const pickup = await Pickup.findById(req.params.id);
+
+    if (!pickup) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pickup not found'
+      });
+    }
+
+    // Check if pickup is assigned to this agent
+    if (!pickup.assignedCollector || pickup.assignedCollector.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'This pickup is not assigned to you'
+      });
+    }
+
+    // Verify the verification code
+    if (pickup.verificationCode !== verificationCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification code'
+      });
+    }
+
+    // Validation
+    if (!actualWeight || actualWeight <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide actual weight'
+      });
+    }
+
+    if (!completionPhoto) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload completion photo'
+      });
+    }
+
+    // Update pickup with completion details
+    pickup.status = 'completed';
+    pickup.actualWeight = actualWeight;
+    pickup.completionPhoto = completionPhoto;
+    pickup.actualPickupTime = new Date();
+    if (notes) pickup.specialInstructions = notes;
+
+    // Calculate final points based on actual weight
     const points = pickup.calculatePoints();
     pickup.pointsAwarded = points;
+    
     await pickup.save();
 
     // ✅ Create Notification for completion
@@ -333,12 +491,14 @@ router.put('/:id/complete', protect, async (req, res) => {
       console.error('Notification error:', error);
     }
 
-    // Reward points to user
-    await User.findByIdAndUpdate(pickup.user, { $inc: { points } });
+    // Reward remaining points to citizen
+    await User.findByIdAndUpdate(pickup.user, { 
+      $inc: { points: Math.floor(points / 2) } // Remaining half points
+    });
 
     res.status(200).json({
       success: true,
-      message: 'Pickup marked as completed',
+      message: 'Pickup completed successfully',
       data: pickup
     });
 
@@ -346,7 +506,7 @@ router.put('/:id/complete', protect, async (req, res) => {
     console.error('Complete pickup error:', error);
     res.status(500).json({
       success: false,
-      message: 'Error marking pickup as completed',
+      message: 'Error completing pickup',
       error: error.message
     });
   }

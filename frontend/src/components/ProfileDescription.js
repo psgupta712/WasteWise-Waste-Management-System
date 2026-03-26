@@ -68,7 +68,7 @@ const ProfileDescription = () => {
         {/* Profile Card */}
         <div className="profile-card">
           <div className="profile-avatar">
-            <div className="avatar-circle">
+            <div className="avatar-circle1">
               {userData.name ? userData.name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div className="avatar-badge">
@@ -78,7 +78,7 @@ const ProfileDescription = () => {
 
           <div className="profile-info">
             <h3 className="profile-name">{userData.name || 'User'}</h3>
-            <p className="profile-type">Citizen Member</p>
+            <p className="profile-type">Citizen</p>
             <div className="profile-level">
               <span className="level-badge">Level {userData.level || 1}</span>
               <span className="eco-warrior">🌱 Eco Warrior</span>
