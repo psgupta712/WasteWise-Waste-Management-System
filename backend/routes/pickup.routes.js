@@ -16,8 +16,7 @@ const assignToAgent = async () => {
   try {
     // Find all pickup agents
     const agents = await User.find({ 
-      userType: 'pickup_agent',
-      isVerified: true 
+      userType: 'pickup_agent'
     });
 
     if (agents.length === 0) {
@@ -145,8 +144,12 @@ router.get('/my-pickups', protect, async (req, res) => {
     let query;
     
     if (req.user.userType === 'pickup_agent') {
-      // For agents: Get pickups assigned to them
-      query = { assignedCollector: req.user._id };
+      query = {
+        $or: [
+        { assignedCollector: req.user._id },   // pickups assigned to this agent
+        { assignedCollector: null, status: 'scheduled' } // unassigned pickups up for grabs
+        ]
+      };
     } else {
       // For citizens: Get their own pickups
       query = { user: req.user._id };
@@ -163,6 +166,7 @@ router.get('/my-pickups', protect, async (req, res) => {
       .skip(skip)
       .populate('assignedCollector', 'name phone')
       .populate('user', 'name email phone address');
+      
 
     const total = await Pickup.countDocuments(query);
 

@@ -7,6 +7,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
+// const rewardsRoutes = require('./routes/rewards.routes');
 
 // Import routes
 const userRoutes = require('./routes/user.routes');
@@ -32,8 +33,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+// Import rewards routes (add this at the top with other imports)
+const rewardsRoutes = require('./routes/rewards.routes');
+
+// Routes
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/rewards', rewardsRoutes);
 
 // Test route
 app.get('/', (req, res) => {

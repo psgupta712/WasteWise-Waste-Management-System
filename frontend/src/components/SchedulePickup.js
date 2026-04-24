@@ -114,6 +114,11 @@ const SchedulePickup = ({ onSuccess }) => {
       return;
     }
 
+    if (!formData.contactPhone) {
+      setError('Please provide a contact phone number');
+      return;
+    }
+
     setLoading(true);
 
     try {

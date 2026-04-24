@@ -280,10 +280,7 @@ const CompletePickup = () => {
                     <a href={`tel:${pickup.contactPhone}`}>{pickup.contactPhone}</a>
                   </div>
                 )}
-                <div className="detail-item-complete verification-code-display">
-                  <FileText size={14} />
-                  <span>Verification: <code>{pickup.verificationCode}</code></span>
-                </div>
+            
               </div>
 
               <button 

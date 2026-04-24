@@ -1,34 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Package, Search, Filter, Calendar, MapPin, Phone,
-  Navigation, CheckCircle, Clock, User, AlertCircle,
-  TrendingUp, ChevronDown, ChevronUp, X, Loader,
-  ExternalLink, Play, RefreshCw, ArrowUpDown, Grid,
-  List as ListIcon, Check
-} from 'lucide-react';
-import './AssignedPickups.css';
+import React, { useState, useEffect } from "react";
+import {
+  Package,
+  Search,
+  Filter,
+  Calendar,
+  MapPin,
+  Phone,
+  Navigation,
+  CheckCircle,
+  Clock,
+  User,
+  AlertCircle,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Loader,
+  ExternalLink,
+  Play,
+  RefreshCw,
+  ArrowUpDown,
+  Grid,
+  List as ListIcon,
+  Check,
+} from "lucide-react";
+import "./AssignedPickups.css";
 
 const AssignedPickups = () => {
   const [loading, setLoading] = useState(true);
   const [pickups, setPickups] = useState([]);
   const [filteredPickups, setFilteredPickups] = useState([]);
-  const [view, setView] = useState('grid'); // 'grid' or 'list'
-  
+  const [view, setView] = useState("grid"); // 'grid' or 'list'
+
   // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [wasteTypeFilter, setWasteTypeFilter] = useState('all');
-  const [dateRange, setDateRange] = useState('all'); // 'all', 'today', 'week', 'month'
-  const [sortBy, setSortBy] = useState('date'); // 'date', 'status', 'wastetype'
-  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [wasteTypeFilter, setWasteTypeFilter] = useState("all");
+  const [dateRange, setDateRange] = useState("all"); // 'all', 'today', 'week', 'month'
+  const [sortBy, setSortBy] = useState("date"); // 'date', 'status', 'wastetype'
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
-  
+
   // Bulk selection
   const [selectedPickups, setSelectedPickups] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Stats
   const [stats, setStats] = useState({
     total: 0,
@@ -36,7 +54,7 @@ const AssignedPickups = () => {
     confirmed: 0,
     inProgress: 0,
     completed: 0,
-    cancelled: 0
+    cancelled: 0,
   });
 
   useEffect(() => {
@@ -50,21 +68,30 @@ const AssignedPickups = () => {
   const fetchPickups = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/pickup/my-pickups', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("token");
 
-      if (response.ok) {
-        const data = await response.json();
-        const allPickups = data.data || [];
-        setPickups(allPickups);
-        calculateStats(allPickups);
-      }
+      const [assignedRes, availableRes] = await Promise.all([
+        fetch("http://localhost:5000/api/pickup/my-pickups", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch("http://localhost:5000/api/pickup/available", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const assignedData = await assignedRes.json();
+      const availableData = await availableRes.json();
+
+      const allPickups = [
+        ...(assignedData.data || []),
+        ...(availableData.data || []),
+      ];
+
+      // ✅ Now use allPickups directly
+      setPickups(allPickups);
+      calculateStats(allPickups);
     } catch (error) {
-      console.error('Error fetching pickups:', error);
+      console.error("Error fetching pickups:", error);
     } finally {
       setLoading(false);
     }
@@ -73,11 +100,11 @@ const AssignedPickups = () => {
   const calculateStats = (pickupList) => {
     setStats({
       total: pickupList.length,
-      scheduled: pickupList.filter(p => p.status === 'scheduled').length,
-      confirmed: pickupList.filter(p => p.status === 'confirmed').length,
-      inProgress: pickupList.filter(p => p.status === 'in-progress').length,
-      completed: pickupList.filter(p => p.status === 'completed').length,
-      cancelled: pickupList.filter(p => p.status === 'cancelled').length
+      scheduled: pickupList.filter((p) => p.status === "scheduled").length,
+      confirmed: pickupList.filter((p) => p.status === "confirmed").length,
+      inProgress: pickupList.filter((p) => p.status === "in-progress").length,
+      completed: pickupList.filter((p) => p.status === "completed").length,
+      cancelled: pickupList.filter((p) => p.status === "cancelled").length,
     });
   };
 
@@ -86,37 +113,40 @@ const AssignedPickups = () => {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(p => 
-        p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.wasteType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.user?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (p) =>
+          p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.wasteType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.user?.name || "")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       );
     }
 
     // Status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(p => p.status === statusFilter);
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((p) => p.status === statusFilter);
     }
 
     // Waste type filter
-    if (wasteTypeFilter !== 'all') {
-      filtered = filtered.filter(p => p.wasteType === wasteTypeFilter);
+    if (wasteTypeFilter !== "all") {
+      filtered = filtered.filter((p) => p.wasteType === wasteTypeFilter);
     }
 
     // Date range filter
-    if (dateRange !== 'all') {
+    if (dateRange !== "all") {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
-      filtered = filtered.filter(p => {
+
+      filtered = filtered.filter((p) => {
         const pickupDate = new Date(p.pickupDate);
-        
-        if (dateRange === 'today') {
+
+        if (dateRange === "today") {
           return pickupDate.toDateString() === today.toDateString();
-        } else if (dateRange === 'week') {
+        } else if (dateRange === "week") {
           const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
           return pickupDate >= weekAgo;
-        } else if (dateRange === 'month') {
+        } else if (dateRange === "month") {
           const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
           return pickupDate >= monthAgo;
         }
@@ -126,11 +156,11 @@ const AssignedPickups = () => {
 
     // Sorting
     filtered.sort((a, b) => {
-      if (sortBy === 'date') {
+      if (sortBy === "date") {
         return new Date(b.pickupDate) - new Date(a.pickupDate);
-      } else if (sortBy === 'status') {
+      } else if (sortBy === "status") {
         return a.status.localeCompare(b.status);
-      } else if (sortBy === 'wastetype') {
+      } else if (sortBy === "wastetype") {
         return a.wasteType.localeCompare(b.wasteType);
       }
       return 0;
@@ -141,10 +171,10 @@ const AssignedPickups = () => {
   };
 
   const handleSelectPickup = (pickupId) => {
-    setSelectedPickups(prev => 
+    setSelectedPickups((prev) =>
       prev.includes(pickupId)
-        ? prev.filter(id => id !== pickupId)
-        : [...prev, pickupId]
+        ? prev.filter((id) => id !== pickupId)
+        : [...prev, pickupId],
     );
   };
 
@@ -152,104 +182,115 @@ const AssignedPickups = () => {
     if (selectedPickups.length === currentPickups.length) {
       setSelectedPickups([]);
     } else {
-      setSelectedPickups(currentPickups.map(p => p._id));
+      setSelectedPickups(currentPickups.map((p) => p._id));
     }
   };
 
   const handleBulkStart = async () => {
     if (selectedPickups.length === 0) return;
-    
+
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await Promise.all(
-        selectedPickups.map(id =>
-          fetch(`http://localhost:5000/api/pickup/${id}/complete`, {
-            method: 'PUT',
+        selectedPickups.map((id) =>
+          fetch(`http://localhost:5000/api/pickup/${id}/start`, {
+            method: "PUT",
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify({ status: 'in-progress' })
-          })
-        )
+            body: JSON.stringify({ status: "in-progress" }),
+          }),
+        ),
       );
-      
+
       setSelectedPickups([]);
       fetchPickups();
       alert(`Started ${selectedPickups.length} pickups!`);
     } catch (error) {
-      console.error('Bulk start error:', error);
-      alert('Error starting pickups');
+      console.error("Bulk start error:", error);
+      alert("Error starting pickups");
     }
   };
 
   const handleStartPickup = async (pickupId) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/pickup/${pickupId}/complete`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5000/api/pickup/${pickupId}/start`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-        body: JSON.stringify({ status: 'in-progress' })
-      });
+      );
 
       if (response.ok) {
         fetchPickups();
+        alert(
+          'Pickup started! Go to "Complete Pickup" tab to enter the verification code and finish the pickup.',
+        ); // ✅ Guide the agent
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to start pickup");
       }
     } catch (error) {
-      console.error('Error starting pickup:', error);
+      console.error("Error starting pickup:", error);
     }
   };
 
   const openGoogleMaps = (address) => {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   const getWasteIcon = (type) => {
     const icons = {
-      biodegradable: '🍃',
-      recyclable: '♻️',
-      'e-waste': '📱',
-      hazardous: '⚠️'
+      biodegradable: "🍃",
+      recyclable: "♻️",
+      "e-waste": "📱",
+      hazardous: "⚠️",
     };
-    return icons[type] || '📦';
+    return icons[type] || "📦";
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      scheduled: '#ff9800',
-      confirmed: '#2196f3',
-      'in-progress': '#9c27b0',
-      completed: '#4caf50',
-      cancelled: '#f44336'
+      scheduled: "#ff9800",
+      confirmed: "#2196f3",
+      "in-progress": "#9c27b0",
+      completed: "#4caf50",
+      cancelled: "#f44336",
     };
-    return colors[status] || '#999';
+    return colors[status] || "#999";
   };
 
   const getTimeSlotDisplay = (slot) => {
     const slots = {
-      morning: '6-10 AM',
-      afternoon: '10 AM-2 PM',
-      evening: '2-6 PM'
+      morning: "6-10 AM",
+      afternoon: "10 AM-2 PM",
+      evening: "2-6 PM",
     };
     return slots[slot] || slot;
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPickups = filteredPickups.slice(indexOfFirstItem, indexOfLastItem);
+  const currentPickups = filteredPickups.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
   const totalPages = Math.ceil(filteredPickups.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -294,7 +335,9 @@ const AssignedPickups = () => {
             <Clock size={20} />
           </div>
           <div className="stat-info">
-            <span className="stat-number">{stats.scheduled + stats.confirmed}</span>
+            <span className="stat-number">
+              {stats.scheduled + stats.confirmed}
+            </span>
             <span className="stat-label">Pending</span>
           </div>
         </div>
@@ -331,15 +374,15 @@ const AssignedPickups = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button className="clear-search" onClick={() => setSearchQuery('')}>
+            <button className="clear-search" onClick={() => setSearchQuery("")}>
               <X size={16} />
             </button>
           )}
         </div>
 
         <div className="filters-actions">
-          <button 
-            className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+          <button
+            className={`filter-toggle-btn ${showFilters ? "active" : ""}`}
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter size={18} />
@@ -348,15 +391,15 @@ const AssignedPickups = () => {
           </button>
 
           <div className="view-switcher">
-            <button 
-              className={`view-btn ${view === 'grid' ? 'active' : ''}`}
-              onClick={() => setView('grid')}
+            <button
+              className={`view-btn ${view === "grid" ? "active" : ""}`}
+              onClick={() => setView("grid")}
             >
               <Grid size={18} />
             </button>
-            <button 
-              className={`view-btn ${view === 'list' ? 'active' : ''}`}
-              onClick={() => setView('list')}
+            <button
+              className={`view-btn ${view === "list" ? "active" : ""}`}
+              onClick={() => setView("list")}
             >
               <ListIcon size={18} />
             </button>
@@ -369,7 +412,10 @@ const AssignedPickups = () => {
         <div className="filters-panel">
           <div className="filter-group">
             <label>Status</label>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option value="all">All Status</option>
               <option value="scheduled">Scheduled</option>
               <option value="confirmed">Confirmed</option>
@@ -381,7 +427,10 @@ const AssignedPickups = () => {
 
           <div className="filter-group">
             <label>Waste Type</label>
-            <select value={wasteTypeFilter} onChange={(e) => setWasteTypeFilter(e.target.value)}>
+            <select
+              value={wasteTypeFilter}
+              onChange={(e) => setWasteTypeFilter(e.target.value)}
+            >
               <option value="all">All Types</option>
               <option value="biodegradable">Biodegradable</option>
               <option value="recyclable">Recyclable</option>
@@ -392,7 +441,10 @@ const AssignedPickups = () => {
 
           <div className="filter-group">
             <label>Date Range</label>
-            <select value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+            >
               <option value="all">All Time</option>
               <option value="today">Today</option>
               <option value="week">Last 7 Days</option>
@@ -409,14 +461,14 @@ const AssignedPickups = () => {
             </select>
           </div>
 
-          <button 
+          <button
             className="clear-filters-btn"
             onClick={() => {
-              setSearchQuery('');
-              setStatusFilter('all');
-              setWasteTypeFilter('all');
-              setDateRange('all');
-              setSortBy('date');
+              setSearchQuery("");
+              setStatusFilter("all");
+              setWasteTypeFilter("all");
+              setDateRange("all");
+              setSortBy("date");
             }}
           >
             Clear All Filters
@@ -436,7 +488,10 @@ const AssignedPickups = () => {
               <Play size={16} />
               Start Selected
             </button>
-            <button className="bulk-btn cancel" onClick={() => setSelectedPickups([])}>
+            <button
+              className="bulk-btn cancel"
+              onClick={() => setSelectedPickups([])}
+            >
               Cancel
             </button>
           </div>
@@ -446,7 +501,9 @@ const AssignedPickups = () => {
       {/* Results Info */}
       <div className="results-info">
         <p>
-          Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredPickups.length)} of {filteredPickups.length} pickups
+          Showing {indexOfFirstItem + 1}-
+          {Math.min(indexOfLastItem, filteredPickups.length)} of{" "}
+          {filteredPickups.length} pickups
         </p>
         {selectedPickups.length === 0 && currentPickups.length > 0 && (
           <button className="select-all-btn" onClick={handleSelectAll}>
@@ -466,9 +523,9 @@ const AssignedPickups = () => {
         <>
           <div className={`pickups-${view}-view`}>
             {currentPickups.map((pickup) => (
-              <div 
-                key={pickup._id} 
-                className={`pickup-card-assigned ${selectedPickups.includes(pickup._id) ? 'selected' : ''}`}
+              <div
+                key={pickup._id}
+                className={`pickup-card-assigned ${selectedPickups.includes(pickup._id) ? "selected" : ""}`}
               >
                 {/* Selection Checkbox */}
                 <div className="pickup-checkbox">
@@ -482,17 +539,19 @@ const AssignedPickups = () => {
                 {/* Pickup Header */}
                 <div className="pickup-card-header-assigned">
                   <div className="pickup-type-assigned">
-                    <span className="waste-icon-assigned">{getWasteIcon(pickup.wasteType)}</span>
+                    <span className="waste-icon-assigned">
+                      {getWasteIcon(pickup.wasteType)}
+                    </span>
                     <div>
                       <h4>{pickup.wasteType}</h4>
                       <span className="pickup-id">#{pickup._id.slice(-6)}</span>
                     </div>
                   </div>
-                  <span 
+                  <span
                     className="status-badge-assigned"
-                    style={{ 
+                    style={{
                       background: `${getStatusColor(pickup.status)}20`,
-                      color: getStatusColor(pickup.status)
+                      color: getStatusColor(pickup.status),
                     }}
                   >
                     {pickup.status}
@@ -522,7 +581,10 @@ const AssignedPickups = () => {
                   {pickup.contactPhone && (
                     <div className="detail-row-assigned">
                       <Phone size={14} />
-                      <a href={`tel:${pickup.contactPhone}`} className="phone-link-assigned">
+                      <a
+                        href={`tel:${pickup.contactPhone}`}
+                        className="phone-link-assigned"
+                      >
                         {pickup.contactPhone}
                       </a>
                     </div>
@@ -545,7 +607,7 @@ const AssignedPickups = () => {
 
                 {/* Actions */}
                 <div className="pickup-actions-assigned">
-                  <button 
+                  <button
                     className="action-btn-assigned navigate"
                     onClick={() => openGoogleMaps(pickup.address)}
                   >
@@ -553,7 +615,7 @@ const AssignedPickups = () => {
                     Navigate
                   </button>
                   {pickup.contactPhone && (
-                    <button 
+                    <button
                       className="action-btn-assigned call"
                       onClick={() => window.open(`tel:${pickup.contactPhone}`)}
                     >
@@ -561,8 +623,9 @@ const AssignedPickups = () => {
                       Call
                     </button>
                   )}
-                  {(pickup.status === 'scheduled' || pickup.status === 'confirmed') && (
-                    <button 
+                  {(pickup.status === "scheduled" ||
+                    pickup.status === "confirmed") && (
+                    <button
                       className="action-btn-assigned start"
                       onClick={() => handleStartPickup(pickup._id)}
                     >
@@ -578,14 +641,14 @@ const AssignedPickups = () => {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="pagination-assigned">
-              <button 
+              <button
                 className="page-btn"
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
               >
                 Previous
               </button>
-              
+
               <div className="page-numbers">
                 {[...Array(totalPages)].map((_, index) => {
                   const pageNum = index + 1;
@@ -597,20 +660,27 @@ const AssignedPickups = () => {
                     return (
                       <button
                         key={pageNum}
-                        className={`page-number ${currentPage === pageNum ? 'active' : ''}`}
+                        className={`page-number ${currentPage === pageNum ? "active" : ""}`}
                         onClick={() => paginate(pageNum)}
                       >
                         {pageNum}
                       </button>
                     );
-                  } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                    return <span key={pageNum} className="page-ellipsis">...</span>;
+                  } else if (
+                    pageNum === currentPage - 2 ||
+                    pageNum === currentPage + 2
+                  ) {
+                    return (
+                      <span key={pageNum} className="page-ellipsis">
+                        ...
+                      </span>
+                    );
                   }
                   return null;
                 })}
               </div>
 
-              <button 
+              <button
                 className="page-btn"
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === totalPages}
