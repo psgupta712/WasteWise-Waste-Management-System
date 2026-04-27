@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import './Dashboard.css';
 
-const Dashboard = () => {
+const Dashboard = ({ onTabChange }) => {
   const [userData, setUserData] = useState(null);
   const [stats, setStats] = useState({
     totalPickups: 0,
@@ -144,10 +144,7 @@ const Dashboard = () => {
             <div className="stat-icon primary-icon">
               <Package size={24} />
             </div>
-            <div className="stat-trend up">
-              <TrendingUp size={16} />
-              <span>+12%</span>
-            </div>
+  
           </div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.totalPickups}</h3>
@@ -163,10 +160,7 @@ const Dashboard = () => {
             <div className="stat-icon success-icon">
               <Recycle size={24} />
             </div>
-            <div className="stat-trend up">
-              <TrendingUp size={16} />
-              <span>+25%</span>
-            </div>
+            
           </div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.wasteRecycled}kg</h3>
@@ -182,10 +176,7 @@ const Dashboard = () => {
             <div className="stat-icon warning-icon">
               <Award size={24} />
             </div>
-            <div className="stat-trend up">
-              <TrendingUp size={16} />
-              <span>+15%</span>
-            </div>
+            
           </div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.points}</h3>
@@ -201,10 +192,7 @@ const Dashboard = () => {
             <div className="stat-icon info-icon">
               <Zap size={24} />
             </div>
-            <div className="stat-trend neutral">
-              <Target size={16} />
-              <span>85%</span>
-            </div>
+            
           </div>
           <div className="stat-content">
             <h3 className="stat-value">{stats.co2Saved}kg</h3>
@@ -225,6 +213,7 @@ const Dashboard = () => {
               key={action.id} 
               className="quick-action-card1"
               style={{ '--action-color': action.color }}
+              onClick={() => onTabChange && onTabChange(action.action)}
             >
               <div className="action-icon">
                 <action.icon size={28} />

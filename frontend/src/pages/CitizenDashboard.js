@@ -13,26 +13,26 @@ import FeedbackSystem from '../components/FeedbackSystem';
 import Dashboard from '../components/Dashboard';
 import NotificationCenter from '../components/NotificationCenter';
 import './CitizenDashboard.css';
-
+ 
 const CitizenDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarHovered, setSidebarHovered] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
-
+ 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
     navigate('/login');
   };
-
+ 
   const handlePickupSuccess = () => {
     setShowSuccessModal(true);
     setTimeout(() => {
       setShowSuccessModal(false);
     }, 3000);
   };
-
+ 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'schedule', label: 'Schedule Pickup', icon: Calendar },
@@ -42,11 +42,11 @@ const CitizenDashboard = () => {
     { id: 'feedback', label: 'Feedback', icon: MessageSquare },
     { id: 'profile', label: 'Profile', icon: User }
   ];
-
+ 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onTabChange={setActiveTab} />;
       case 'profile':
         return <ProfileDescription />;
       case 'schedule':
@@ -60,10 +60,10 @@ const CitizenDashboard = () => {
       case 'feedback':
         return <FeedbackSystem />;
       default:
-        return <Dashboard />;
+        return <Dashboard onTabChange={setActiveTab} />;
     }
   };
-
+ 
   return (
     <div className="dashboard-container">
       {/* Success Modal */}
@@ -86,7 +86,7 @@ const CitizenDashboard = () => {
           </div>
         </div>
       )}
-
+ 
       {/* Sidebar */}
       <aside 
         className={`sidebar ${sidebarHovered ? 'open' : 'closed'}`}
@@ -99,7 +99,7 @@ const CitizenDashboard = () => {
             {sidebarHovered && <h1 className="logo-text1">WasteWise</h1>}
           </div>
         </div>
-
+ 
         <nav className="sidebar-nav">
           {menuItems.map((item) => (
             <button
@@ -112,7 +112,7 @@ const CitizenDashboard = () => {
             </button>
           ))}
         </nav>
-
+ 
         <div className="sidebar-footer">
           <button className="logout-btn" onClick={handleLogout}>
             <LogOut size={20} />
@@ -120,7 +120,7 @@ const CitizenDashboard = () => {
           </button>
         </div>
       </aside>
-
+ 
       {/* Main Content */}
       <main className={`main-content ${sidebarHovered ? 'sidebar-open' : 'sidebar-closed'}`}>
         <header className="dashboard-header">
@@ -130,7 +130,7 @@ const CitizenDashboard = () => {
             </h2>
             <p className="page-subtitle">Welcome back! Manage your waste responsibly 🌱</p>
           </div>
-
+ 
           {/* ✅ Updated Header Right with clickable Profile Icon */}
           <div className="header-right">
             <div className="search-bar">
@@ -154,7 +154,7 @@ const CitizenDashboard = () => {
             </div>
           </div>
         </header>
-
+ 
         <div className="content-area">
           {renderContent()}
         </div>
@@ -162,5 +162,5 @@ const CitizenDashboard = () => {
     </div>
   );
 };
-
+ 
 export default CitizenDashboard;

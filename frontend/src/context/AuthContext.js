@@ -16,18 +16,35 @@ export const useAuth = () => {
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // true until auth is resolved
   const [error, setError] = useState(null);
 
-  // Check if user is logged in on app load
+  // On app load, verify token by fetching fresh profile from backend
+  // This avoids stale user data and validates the token is still good
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
-    setLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Verify the token is still valid by hitting the profile endpoint
+        const response = await authAPI.getProfile();
+        setUser(response.data);
+      } catch (err) {
+        // Token is invalid or expired — clear everything
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   // Register function
@@ -35,12 +52,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authAPI.register(userData);
-      
-      // Save token and user data
+
+      // Only store the token — fetch user profile from server, don't cache sensitive user data
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('userType', response.data.userType);
       setUser(response.data);
-      
+
       return { success: true, data: response.data };
     } catch (err) {
       setError(err.message || 'Registration failed');
@@ -53,12 +70,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const response = await authAPI.login(credentials);
-      
-      // Save token and user data
+
+      // Only store the token — not the full user object
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+      localStorage.setItem('userType', response.data.userType);
       setUser(response.data);
-      
+
       return { success: true, data: response.data };
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -66,14 +83,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+  // Logout function — also invalidates token on the backend
+  const logout = async () => {
+    try {
+      await authAPI.logout(); // tell server to blacklist the token
+    } catch (err) {
+      // Ignore server errors — clear local state regardless
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      setUser(null);
+    }
   };
 
-  // Values to be shared across app
   const value = {
     user,
     loading,

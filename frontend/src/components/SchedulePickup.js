@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Package, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import './SchedulePickup.css';
-
+ 
 const SchedulePickup = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
     wasteType: '',
@@ -12,15 +12,15 @@ const SchedulePickup = ({ onSuccess }) => {
     specialInstructions: '',
     contactPhone: ''
   });
-
+ 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [userAddress, setUserAddress] = useState('');
-
+ 
   useEffect(() => {
     fetchUserAddress();
   }, []);
-
+ 
   const fetchUserAddress = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -29,13 +29,15 @@ const SchedulePickup = ({ onSuccess }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-
+ 
       if (response.ok) {
         const data = await response.json();
-        setUserAddress(data.address || '');
+        const rawAddress = data.address || '';
+        const cleanAddress = rawAddress.replace(/[,\s]/g, '').length > 0 ? rawAddress : '';
+        setUserAddress(cleanAddress);
         setFormData(prev => ({
           ...prev,
-          address: data.address || '',
+          address: cleanAddress,
           contactPhone: data.phone || ''
         }));
       }
@@ -43,7 +45,7 @@ const SchedulePickup = ({ onSuccess }) => {
       console.error('Error fetching address:', error);
     }
   };
-
+ 
   const wasteTypes = [
     { 
       value: 'biodegradable', 
@@ -70,13 +72,13 @@ const SchedulePickup = ({ onSuccess }) => {
       desc: 'Chemicals, paints, medical waste'
     }
   ];
-
+ 
   const timeSlots = [
     { value: 'morning', label: 'Morning (6 AM - 10 AM)', icon: '🌅' },
     { value: 'afternoon', label: 'Afternoon (10 AM - 2 PM)', icon: '☀️' },
     { value: 'evening', label: 'Evening (2 PM - 6 PM)', icon: '🌆' }
   ];
-
+ 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -85,17 +87,17 @@ const SchedulePickup = ({ onSuccess }) => {
     }));
     setError('');
   };
-
+ 
   const getTomorrowDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split('T')[0];
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+ 
     // Validation
     if (!formData.wasteType) {
       setError('Please select a waste type');
@@ -113,14 +115,14 @@ const SchedulePickup = ({ onSuccess }) => {
       setError('Please provide a pickup address');
       return;
     }
-
+ 
     if (!formData.contactPhone) {
       setError('Please provide a contact phone number');
       return;
     }
-
+ 
     setLoading(true);
-
+ 
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/pickup/schedule', {
@@ -131,9 +133,9 @@ const SchedulePickup = ({ onSuccess }) => {
         },
         body: JSON.stringify(formData)
       });
-
+ 
       const data = await response.json();
-
+ 
       if (response.ok) {
         // Call the onSuccess callback to show modal
         if (onSuccess) {
@@ -160,7 +162,7 @@ const SchedulePickup = ({ onSuccess }) => {
       setLoading(false);
     }
   };
-
+ 
   return (
     <div className="schedule-pickup-container">
       {/* Header Section */}
@@ -177,7 +179,7 @@ const SchedulePickup = ({ onSuccess }) => {
           <div className="deco-circle circle-3"></div>
         </div>
       </div>
-
+ 
       {/* Error Message */}
       {error && (
         <div className="error-alert">
@@ -185,7 +187,7 @@ const SchedulePickup = ({ onSuccess }) => {
           <p>{error}</p>
         </div>
       )}
-
+ 
       <form onSubmit={handleSubmit} className="pickup-form">
         {/* Waste Type Selection */}
         <div className="form-section">
@@ -210,7 +212,7 @@ const SchedulePickup = ({ onSuccess }) => {
             ))}
           </div>
         </div>
-
+ 
         {/* Date and Time Selection */}
         <div className="form-section">
           <label className="section-label">
@@ -230,7 +232,7 @@ const SchedulePickup = ({ onSuccess }) => {
                 className="date-input"
               />
             </div>
-
+ 
             <div className="form-group">
               <label htmlFor="timeSlot">Time Slot</label>
               <select
@@ -250,14 +252,14 @@ const SchedulePickup = ({ onSuccess }) => {
             </div>
           </div>
         </div>
-
+ 
         {/* Address Section */}
         <div className="form-section">
           <label className="section-label">
             <MapPin size={20} />
             Pickup Address
           </label>
-          <div className="form-group">
+          <div className="form-group1">
             <textarea
               name="address"
               value={formData.address}
@@ -268,7 +270,7 @@ const SchedulePickup = ({ onSuccess }) => {
             />
           </div>
         </div>
-
+ 
         {/* Additional Details */}
         <div className="form-section">
           <label className="section-label">
@@ -290,7 +292,7 @@ const SchedulePickup = ({ onSuccess }) => {
                 className="number-input"
               />
             </div>
-
+ 
             <div className="form-group">
               <label htmlFor="contactPhone">Contact Phone</label>
               <input
@@ -304,7 +306,7 @@ const SchedulePickup = ({ onSuccess }) => {
               />
             </div>
           </div>
-
+ 
           <div className="form-group">
             <label htmlFor="specialInstructions">Special Instructions (Optional)</label>
             <textarea
@@ -318,7 +320,7 @@ const SchedulePickup = ({ onSuccess }) => {
             />
           </div>
         </div>
-
+ 
         {/* Submit Button */}
         <div className="form-actions">
           <button
@@ -340,7 +342,7 @@ const SchedulePickup = ({ onSuccess }) => {
           </button>
         </div>
       </form>
-
+ 
       {/* Info Cards */}
       <div className="info-cards">
         <div className="info-card">
@@ -362,5 +364,5 @@ const SchedulePickup = ({ onSuccess }) => {
     </div>
   );
 };
-
+ 
 export default SchedulePickup;

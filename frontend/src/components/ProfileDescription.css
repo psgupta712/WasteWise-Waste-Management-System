@@ -564,10 +564,10 @@
   transition: all 0.3s ease;
 }
 
-.stat-card:hover .stat-value {
+/* .stat-card:hover .stat-value {
   color: var(--card-color);
   transform: scale(1.05);
-}
+} */
 
 .stat-label {
   font-size: 14px;

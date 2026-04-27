@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Base URL for backend API
-const API_URL = 'http://localhost:5000/api';
+// Base URL for backend API — set REACT_APP_API_URL in your .env.production file
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -23,6 +23,21 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Global response interceptor — handles expired tokens
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid — clear storage and redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userType');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 /* ===========================
    AUTHENTICATION APIs
 =========================== */
@@ -42,6 +57,14 @@ export const authAPI = {
       return res.data;
     } catch (error) {
       throw error.response?.data || { message: 'Login failed' };
+    }
+  },
+
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Even if the server call fails, we still clear local state
     }
   },
 
@@ -88,7 +111,7 @@ export const wasteAPI = {
 
   search: async (query) => {
     try {
-      const res = await api.get(`/waste/search?q=${query}`);
+      const res = await api.get(`/waste/search?q=${encodeURIComponent(query)}`);
       return res.data;
     } catch (error) {
       throw error.response?.data || { message: 'Search failed' };

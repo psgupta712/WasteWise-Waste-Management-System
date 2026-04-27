@@ -1,19 +1,50 @@
-/* Schedule Pickup Container */
+/* ============================================================
+   WasteWise — Schedule Pickup
+   Professional green theme, consistent with dashboard
+   ============================================================ */
+
 .schedule-pickup-container {
-  max-width: 1200px;
+  max-width: 860px;
   margin: 0 auto;
-  animation: fadeIn 0.5s ease-in;
+  padding: 0 16px;
 }
 
-/* Header Section */
+/* ── Header Banner ───────────────────────────────────────── */
 .schedule-header {
-  background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+  background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 60%, #40916c 100%);
   border-radius: 20px;
-  padding: 40px;
-  margin-bottom: 32px;
+  padding: 36px 40px;
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(45, 106, 79, 0.2);
+  box-shadow: 0 4px 20px rgba(27, 67, 50, 0.25);
+}
+
+.schedule-header::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.schedule-header::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: 25%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .header-content {
@@ -22,378 +53,352 @@
 }
 
 .schedule-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  color: white;
-  margin: 0 0 12px 0;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.3px;
 }
 
 .schedule-subtitle {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.78);
   margin: 0;
+  line-height: 1.5;
 }
 
 .header-decoration {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 300px;
-  height: 100%;
-  pointer-events: none;
+  position: relative;
+  width: 100px;
+  height: 80px;
+  z-index: 2;
 }
 
 .deco-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
 }
 
-.circle-1 {
-  width: 150px;
-  height: 150px;
-  top: -30px;
-  right: -30px;
-  animation: float 6s ease-in-out infinite;
-}
+.circle-1 { width: 60px; height: 60px; top: 0; right: 0; }
+.circle-2 { width: 40px; height: 40px; top: 20px; right: 45px; background: rgba(255,255,255,.07); }
+.circle-3 { width: 24px; height: 24px; top: 8px; right: 20px; background: rgba(255,255,255,.15); }
 
-.circle-2 {
-  width: 100px;
-  height: 100px;
-  top: 50px;
-  right: 100px;
-  animation: float 8s ease-in-out infinite;
-}
-
-.circle-3 {
-  width: 80px;
-  height: 80px;
-  bottom: -20px;
-  right: 150px;
-  animation: float 7s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-/* Alert Messages */
-.success-alert,
+/* ── Error Alert ─────────────────────────────────────────── */
 .error-alert {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
-  border-radius: 12px;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+  padding: 14px 18px;
   margin-bottom: 24px;
-  animation: slideDown 0.4s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.success-alert {
-  background: #d4edda;
-  border: 2px solid #28a745;
-  color: #155724;
-}
-
-.success-alert h4 {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.success-alert p {
-  margin: 0;
+  color: #dc2626;
   font-size: 14px;
-}
-
-.error-alert {
-  background: #f8d7da;
-  border: 2px solid #dc3545;
-  color: #721c24;
-}
-
-.error-alert p {
-  margin: 0;
   font-weight: 500;
 }
 
-/* Pickup Form */
+/* ── Form ────────────────────────────────────────────────── */
 .pickup-form {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Form Section */
+/* ── Form Section Card ───────────────────────────────────── */
 .form-section {
-  margin-bottom: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f4f2;
 }
 
 .section-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
+  gap: 8px;
+  font-size: 15px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
+  color: #1a2e22;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f0f4f2;
 }
 
-/* Waste Type Grid */
+.section-label svg {
+  color: #2d6a4f;
+}
+
+/* ── Waste Type Grid ─────────────────────────────────────── */
 .waste-type-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
 }
 
 .waste-type-card {
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 16px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  border: 1.5px solid #e4ede8;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #fafcfb;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
 }
 
 .waste-type-card:hover {
-  border-color: #2d6a4f;
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(45, 106, 79, 0.15);
+  border-color: #40916c;
+  background: #f2faf5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.1);
 }
 
 .waste-type-card.selected {
   border-color: #2d6a4f;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%);
-  box-shadow: 0 8px 20px rgba(45, 106, 79, 0.2);
+  background: #edf7f0;
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.12);
 }
 
 .waste-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+  font-size: 32px;
+  line-height: 1;
 }
 
 .waste-type-card h4 {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  color: #1a2e22;
+  margin: 0;
 }
 
 .waste-type-card p {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  color: #7a9e8a;
   margin: 0;
+  line-height: 1.4;
 }
 
 .selection-indicator {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   color: #2d6a4f;
 }
 
-/* Date Time Grid */
+/* ── Date Time Grid ──────────────────────────────────────── */
 .date-time-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-/* Form Groups */
-.form-group {
+/* ── Form Group ──────────────────────────────────────────── */
+.form-group1 {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-group label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: #3a7a4a;
+  letter-spacing: 0.2px;
 }
 
-/* Input Styles */
 .date-input,
 .select-input,
-.text-input,
 .number-input,
+.text-input,
 .textarea-input {
-  padding: 14px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border: 1.5px solid #d0e8d8;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1a2e22;
+  background: #ffffff;
   font-family: inherit;
-  transition: all 0.3s ease;
-  background: white;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.date-input::placeholder,
+.select-input::placeholder,
+.number-input::placeholder,
+.text-input::placeholder,
+.textarea-input::placeholder {
+  color: #9cb8a8;
 }
 
 .date-input:focus,
 .select-input:focus,
-.text-input:focus,
 .number-input:focus,
+.text-input:focus,
 .textarea-input:focus {
-  outline: none;
-  border-color: #2d6a4f;
-  box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
+  border-color: #d0e8d8;
+  box-shadow: none;
+  background: #ffffff;
 }
 
-.select-input {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 20px;
-  padding-right: 40px;
+.date-input:hover,
+.select-input:hover,
+.number-input:hover,
+.text-input:hover,
+.textarea-input:hover {
+  border-color: #d0e8d8;
 }
 
 .textarea-input {
   resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
+  min-height: 88px;
+  line-height: 1.5;
 }
 
-.number-input {
-  max-width: 200px;
+.select-input {
+  appearance: auto;
+  cursor: pointer;
 }
 
-/* Form Actions */
+/* ── Submit Button ───────────────────────────────────────── */
 .form-actions {
   display: flex;
   justify-content: center;
-  padding-top: 20px;
-  border-top: 2px solid #f0f0f0;
 }
 
-.submit-btn {
+.schedule-pickup-container .submit-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 40px;
-  background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
-  color: white;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 48px;
+  background: #1b4332 !important;
+  color: #ffffff;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+  font-family: inherit;
+  letter-spacing: 0.3px;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(27, 67, 50, 0.3);
+  min-width: 220px;
 }
 
-.submit-btn:hover:not(:disabled) {
+.schedule-pickup-container .submit-btn:hover:not(:disabled) {
+  background: #152f25 !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(45, 106, 79, 0.4);
+  box-shadow: 0 6px 20px rgba(27, 67, 50, 0.38);
 }
 
-.submit-btn:disabled {
-  opacity: 0.6;
+.schedule-pickup-container .submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.schedule-pickup-container .submit-btn:disabled {
+  opacity: 0.65;
   cursor: not-allowed;
+  transform: none;
 }
 
 .spinner-small {
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-top: 3px solid white;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* Info Cards */
+/* ── Info Cards ──────────────────────────────────────────── */
 .info-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-top: 32px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
 }
 
 .info-card {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 16px;
-  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 16px;
+  background: #ffffff;
+  border: 1px solid #e8f0eb;
+  border-radius: 14px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .info-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .info-icon1 {
-  font-size: 48px;
-  margin-bottom: 12px;
+  width: 48px;
+  height: 48px;
+  background: #edf7f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
 }
 
 .info-card h4 {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-}
-
-.info-card p {
   font-size: 14px;
-  color: #666;
+  font-weight: 700;
+  color: #1a2e22;
   margin: 0;
 }
 
-/* Responsive Design */
+.info-card p {
+  font-size: 13px;
+  color: #7a9e8a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
   .schedule-header {
-    padding: 28px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px 20px;
   }
 
-  .schedule-title {
-    font-size: 24px;
-  }
-
-  .pickup-form {
-    padding: 24px 16px;
-  }
+  .schedule-title { font-size: 22px; }
 
   .waste-type-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .date-time-grid {
-    grid-template-columns: 1fr;
-  }
-
+  .date-time-grid,
   .details-grid {
     grid-template-columns: 1fr;
   }
@@ -402,19 +407,16 @@
     grid-template-columns: 1fr;
   }
 
-  .submit-btn {
-    width: 100%;
+  .form-actions {
     justify-content: center;
   }
-}
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  .submit-btn {
+    width: 100%;
+    max-width: 400px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .form-section {
+    padding: 20px 16px;
   }
 }
