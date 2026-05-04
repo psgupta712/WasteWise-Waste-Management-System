@@ -213,4 +213,161 @@ const resetPasswordWithOTP = async (req, res) => {
   }
 };
 
-module.exports = { sendOTP, verifyOTP, resetPasswordWithOTP };
+// exports at bottom of file
+
+// ─────────────────────────────────────────────────────────────
+// @desc    Send OTP for email verification during registration
+// @route   POST /api/auth/send-register-otp
+// @access  Public
+// ─────────────────────────────────────────────────────────────
+const sendRegisterOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please provide an email address' });
+    }
+
+    // Check if email already registered
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: 'This email is already registered. Please log in.' });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Store with a 'register' flag so it can't be used for password reset
+    otpStore.set(`reg:${email}`, { otp, expiresAt, verified: false });
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: #f9fbe7; padding: 30px; border-radius: 0 0 8px 8px; border: 1px solid #c8e6c9; }
+          .otp-box { background: #ffffff; border: 2px solid #2d6a4f; border-radius: 12px; padding: 20px; text-align: center; margin: 24px 0; }
+          .otp-code { font-size: 42px; font-weight: 700; letter-spacing: 10px; color: #1b4332; font-family: monospace; }
+          .expire-note { color: #d97706; font-size: 14px; font-weight: 600; margin: 0; }
+          .footer { text-align: center; margin-top: 20px; color: #888; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>♻️ WasteWise</h1>
+            <h2>Verify Your Email</h2>
+          </div>
+          <div class="content">
+            <p>Welcome to WasteWise! Use the OTP below to verify your email address and complete your registration:</p>
+            <div class="otp-box">
+              <div class="otp-code">${otp}</div>
+              <p class="expire-note">⏱ This OTP expires in 10 minutes</p>
+            </div>
+            <p>If you didn't request this, please ignore this email.</p>
+            <p>Best regards,<br><strong>The WasteWise Team</strong></p>
+          </div>
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} WasteWise. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    await sendEmail({
+      to: email,
+      subject: 'Verify Your Email — WasteWise',
+      html,
+    });
+
+    res.status(200).json({ success: true, message: 'Verification OTP sent to your email' });
+
+  } catch (error) {
+    console.error('Send register OTP error:', error);
+    res.status(500).json({ success: false, message: 'Failed to send OTP. Please try again.' });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────
+// @desc    Verify email OTP and complete registration
+// @route   POST /api/auth/verify-register-otp
+// @access  Public
+// ─────────────────────────────────────────────────────────────
+const verifyRegisterOTP = async (req, res) => {
+  try {
+    const { email, otp, name, password, phone, userType, address,
+            companyName, industryType, wasteGenerationCapacity } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+    }
+
+    const record = otpStore.get(`reg:${email}`);
+
+    if (!record) {
+      return res.status(400).json({ success: false, message: 'No OTP found. Please request a new one.' });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(`reg:${email}`);
+      return res.status(400).json({ success: false, message: 'OTP has expired. Please request a new one.' });
+    }
+
+    if (record.otp !== otp.trim()) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP. Please try again.' });
+    }
+
+    // OTP valid — clear it
+    otpStore.delete(`reg:${email}`);
+
+    // Double-check email not taken (race condition safety)
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: 'This email is already registered.' });
+    }
+
+    // Build user data
+    const userData = {
+      name, email, password,
+      phone: phone || '',
+      userType: userType || 'citizen',
+      address: address || '',
+      isEmailVerified: true,
+    };
+
+    if (userType === 'industry') {
+      userData.companyName = companyName;
+      userData.industryType = industryType;
+      userData.wasteGenerationCapacity = wasteGenerationCapacity;
+    }
+
+    const user = await User.create(userData);
+
+    // Generate token
+    const crypto = require('crypto');
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    res.status(201).json({
+      success: true,
+      message: 'Email verified and account created successfully',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        userType: user.userType,
+        token,
+      },
+    });
+
+  } catch (error) {
+    console.error('Verify register OTP error:', error);
+    res.status(500).json({ success: false, message: 'Server error. Please try again.' });
+  }
+};
+
+module.exports = { sendOTP, verifyOTP, resetPasswordWithOTP, sendRegisterOTP, verifyRegisterOTP };

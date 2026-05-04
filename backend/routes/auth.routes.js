@@ -2,23 +2,27 @@
 const express = require('express');
 const router = express.Router();
 const { registerUser, loginUser, getUserProfile, forgotPassword, resetPassword } = require('../controllers/authController');
-const { sendOTP, verifyOTP, resetPasswordWithOTP } = require('../controllers/otpController');
+const { sendOTP, verifyOTP, resetPasswordWithOTP, sendRegisterOTP, verifyRegisterOTP } = require('../controllers/otpController');
 const { protect } = require('../middleware/auth.middleware');
 
-// Public routes (no login required)
+// Public routes
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
-// Original link-based reset (keep as-is)
+// Link-based password reset (original)
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 
-// OTP-based reset (new)
+// OTP-based password reset
 router.post('/send-otp', sendOTP);
 router.post('/verify-otp', verifyOTP);
 router.post('/reset-password-otp', resetPasswordWithOTP);
 
-// Protected routes (login required)
+// Email verification OTP during registration (new)
+router.post('/send-register-otp', sendRegisterOTP);
+router.post('/verify-register-otp', verifyRegisterOTP);
+
+// Protected routes
 router.get('/profile', protect, getUserProfile);
 
 module.exports = router;
