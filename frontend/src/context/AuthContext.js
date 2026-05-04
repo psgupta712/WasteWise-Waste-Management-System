@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authAPI } from '../services/api';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { authAPI } from "../services/api";
 
 // Create Context
 const AuthContext = createContext();
@@ -8,7 +8,7 @@ const AuthContext = createContext();
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
   // This avoids stale user data and validates the token is still good
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
 
       if (!token) {
         setLoading(false);
@@ -31,13 +31,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        // Verify the token is still valid by hitting the profile endpoint
         const response = await authAPI.getProfile();
-        setUser(response.data);
+        // response is the full axios response; response.data is the backend body
+        // backend returns { success: true, data: { _id, name, userType, ... } }
+        setUser(response.data?.data || response.data);
       } catch (err) {
-        // Token is invalid or expired — clear everything
-        localStorage.removeItem('token');
-        localStorage.removeItem('userType');
+        localStorage.removeItem("token");
+        localStorage.removeItem("userType");
         setUser(null);
       } finally {
         setLoading(false);
@@ -54,13 +54,13 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(userData);
 
       // Only store the token — fetch user profile from server, don't cache sensitive user data
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userType', response.data.userType);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userType", response.data.userType);
       setUser(response.data);
 
       return { success: true, data: response.data };
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || "Registration failed");
       return { success: false, error: err.message };
     }
   };
@@ -72,13 +72,13 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(credentials);
 
       // Only store the token — not the full user object
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userType', response.data.userType);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userType", response.data.userType);
       setUser(response.data);
 
       return { success: true, data: response.data };
     } catch (err) {
-      setError(err.message || 'Login failed');
+      setError(err.message || "Login failed");
       return { success: false, error: err.message };
     }
   };
@@ -90,8 +90,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       // Ignore server errors — clear local state regardless
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('userType');
+      localStorage.removeItem("token");
+      localStorage.removeItem("userType");
       setUser(null);
     }
   };
@@ -103,14 +103,10 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthContext;

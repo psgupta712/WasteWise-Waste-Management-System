@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// Base URL for backend API — set REACT_APP_API_URL in your .env.production file
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,7 +9,7 @@ const api = axios.create({
   }
 });
 
-// Automatically attach token to requests
+// Attach token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,14 +21,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Global response interceptor — handles expired tokens
+// Handle expired/invalid tokens globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid — clear storage and redirect to login
       localStorage.removeItem('token');
-      localStorage.removeItem('user');
       localStorage.removeItem('userType');
       window.location.href = '/login';
     }
@@ -64,14 +60,14 @@ export const authAPI = {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      // Even if the server call fails, we still clear local state
+      // Ignore server errors
     }
   },
 
   getProfile: async () => {
     try {
       const res = await api.get('/auth/profile');
-      return res.data;
+      return res; // return full axios response
     } catch (error) {
       throw error.response?.data || { message: 'Failed to fetch profile' };
     }
@@ -189,76 +185,4 @@ export const pickupAPI = {
   }
 };
 
-/* ===========================
-   INDUSTRY WASTE APIs
-=========================== */
-export const industryAPI = {
-  submitDeclaration: async (data) => {
-    try {
-      const res = await api.post('/industry/waste/declare', data);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to submit declaration' };
-    }
-  },
-
-  getDeclarations: async (status = '', year = '', page = 1, limit = 10) => {
-    try {
-      const params = new URLSearchParams({ page, limit });
-      if (status) params.append('status', status);
-      if (year) params.append('year', year);
-      const res = await api.get(`/industry/waste/declarations?${params}`);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to fetch declarations' };
-    }
-  },
-
-  getDeclarationById: async (id) => {
-    try {
-      const res = await api.get(`/industry/waste/declarations/${id}`);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to fetch declaration' };
-    }
-  },
-
-  trackWaste: async (trackingId) => {
-    try {
-      const res = await api.get(`/industry/waste/track/${trackingId}`);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to track waste' };
-    }
-  },
-
-  getStats: async () => {
-    try {
-      const res = await api.get('/industry/waste/stats');
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to fetch statistics' };
-    }
-  },
-
-  getCertificate: async (declarationId) => {
-    try {
-      const res = await api.get(`/industry/waste/certificate/${declarationId}`);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to generate certificate' };
-    }
-  },
-
-  deleteDeclaration: async (id) => {
-    try {
-      const res = await api.delete(`/industry/waste/${id}`);
-      return res.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Failed to delete declaration' };
-    }
-  }
-};
-
-// Export axios instance
 export default api;
